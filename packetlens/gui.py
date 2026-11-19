@@ -17,8 +17,8 @@ class App:
         self.packets=[];self.streams=StreamTable();self.worker=None;self.bytes=0;self.fn=lambda p:True;self.shown=0;self.last_error=''
         self.status=tk.StringVar(value='就绪 · 可打开示例 PCAP 或选择网卡开始抓包')
         self.iface=tk.StringVar();self.bpf=tk.StringVar(value='tcp or udp or icmp or icmp6 or arp');self.expr=tk.StringVar();self.promisc=tk.BooleanVar(value=False)
-        menu=tk.Menu(root);file=tk.Menu(menu,tearoff=False);file.add_command(label='打开 PCAP…',command=self.open,accelerator='⌘O');file.add_command(label='打开课程示例',command=self.sample,accelerator='⌘D');file.add_command(label='保存全部 PCAP…',command=self.save);file.add_command(label='导出显示结果 CSV…',command=self.export);file.add_separator();file.add_command(label='退出',command=self.close);menu.add_cascade(label='文件',menu=file)
-        actions=tk.Menu(menu,tearoff=False);actions.add_command(label='应用显示过滤',command=self.apply_filter);actions.add_command(label='查看选中 TCP 流',command=self.follow,accelerator='⌘T');actions.add_command(label='示例 HTTP 过滤',command=lambda:self.preset('http'));actions.add_command(label='显示全部',command=lambda:self.preset(''));menu.add_cascade(label='分析',menu=actions);root.config(menu=menu)
+        menu=tk.Menu(root);file=tk.Menu(menu,tearoff=False);file.add_command(label='打开 PCAP…',command=self.open,accelerator='⌘O');file.add_command(label='打开课程示例',command=self.sample,accelerator='⌘D');file.add_command(label='打开 Linux 实测 PCAP',command=lambda:self.load(Path(__file__).resolve().parents[1]/'evidence'/'live-loopback.pcap'),accelerator='⌘L');file.add_command(label='保存全部 PCAP…',command=self.save);file.add_command(label='导出显示结果 CSV…',command=self.export);file.add_separator();file.add_command(label='退出',command=self.close);menu.add_cascade(label='文件',menu=file)
+        actions=tk.Menu(menu,tearoff=False);actions.add_command(label='应用显示过滤',command=self.apply_filter);actions.add_command(label='查看选中 TCP 流',command=self.follow,accelerator='⌘T');actions.add_command(label='示例 HTTP 过滤',command=lambda:self.preset('http'),accelerator='⌘⇧F');actions.add_command(label='显示全部',command=lambda:self.preset(''));menu.add_cascade(label='分析',menu=actions);root.config(menu=menu)
         outer=ttk.Frame(root,padding=14);outer.pack(fill='both',expand=True)
         ttk.Label(outer,text='PacketLens',font=('Helvetica',25,'bold')).pack(anchor='w')
         ttk.Label(outer,text='实时捕获  /  协议分层  /  TCP 流重组',foreground='#596575').pack(anchor='w',pady=(0,10))
@@ -37,10 +37,10 @@ class App:
         self.details=tk.Text(lower,height=11,width=55,font=('Menlo',10),wrap='word',state='disabled');self.hex=tk.Text(lower,height=11,width=55,font=('Menlo',10),wrap='none',state='disabled');lower.add(self.details,weight=1);lower.add(self.hex,weight=1)
         flow=ttk.Frame(notebook);notebook.add(flow,text='TCP 流统计');self.flowtext=tk.Text(flow,font=('Menlo',11),state='disabled',wrap='word');self.flowtext.pack(fill='both',expand=True)
         ttk.Label(outer,textvariable=self.status,wraplength=1120,foreground='#384b62').pack(fill='x',pady=(7,0))
-        root.bind('<Command-o>',lambda e:self.open());root.bind('<Control-o>',lambda e:self.open());root.bind('<Command-d>',lambda e:self.sample());root.bind('<Control-d>',lambda e:self.sample());root.bind('<Command-t>',lambda e:self.follow());root.protocol('WM_DELETE_WINDOW',self.close)
+        root.bind('<Command-o>',lambda e:self.open());root.bind('<Control-o>',lambda e:self.open());root.bind('<Command-d>',lambda e:self.sample());root.bind('<Control-d>',lambda e:self.sample());root.bind('<Command-t>',lambda e:self.follow());root.bind('<Command-Shift-F>',lambda e:self.preset('http'));root.bind('<Command-l>',lambda e:self.load(Path(__file__).resolve().parents[1]/'evidence'/'live-loopback.pcap'));root.protocol('WM_DELETE_WINDOW',self.close)
         self.refresh();self.update_summary();root.after(50,self.poll)
         if path:self.load(path)
-    def settext(self,widget,text):widget.config(state='normal');widget.delete('1.0','end');widget.insert('1.0',text);widget.config(state='disabled')
+    def settext(self,widget,text):widget.config(state='normal');widget.delete('1.0','end');widget.insert('1.0',text.replace('\r\n','\n').replace('\r','\\r'));widget.config(state='disabled')
     def active(self):return self.worker and self.worker.thread.is_alive()
     def refresh(self):
         try:
