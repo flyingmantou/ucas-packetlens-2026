@@ -1,0 +1,2 @@
+# Optional process-to-flow attribution. Parsing and offline GUI need only stdlib.
+psutil>=5.9,<8
