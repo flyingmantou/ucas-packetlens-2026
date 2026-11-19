@@ -1,0 +1,6 @@
+{
+  "command": "python -m compileall -q packetlens scripts tests",
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": ""
+}

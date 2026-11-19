@@ -1,0 +1,46 @@
+{
+  "kind": "labelled screenshot and log replay",
+  "seconds": 175,
+  "scenes": [
+    {
+      "seconds": 9,
+      "title": "项目介绍"
+    },
+    {
+      "seconds": 13,
+      "title": "1  编译检查与启动"
+    },
+    {
+      "seconds": 20,
+      "title": "2  报文列表与分层字段"
+    },
+    {
+      "seconds": 20,
+      "title": "3  HTTP 显示过滤"
+    },
+    {
+      "seconds": 22,
+      "title": "4  TCP 乱序与重传"
+    },
+    {
+      "seconds": 21,
+      "title": "5  Linux 真实抓包证据"
+    },
+    {
+      "seconds": 20,
+      "title": "6  打开实际捕获结果"
+    },
+    {
+      "seconds": 18,
+      "title": "7  进程归属与实现边界"
+    },
+    {
+      "seconds": 20,
+      "title": "8  固定回归测试与真实排错"
+    },
+    {
+      "seconds": 12,
+      "title": "9  复现与交付"
+    }
+  ]
+}

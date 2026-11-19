@@ -1,0 +1,302 @@
+﻿2026-11-19T06:39:28.7292327Z Current runner version: '2.338.2'
+2026-11-19T06:39:28.7320578Z ##[group]Runner Image Provisioner
+2026-11-19T06:39:28.7321560Z Hosted Compute Agent
+2026-11-19T06:39:28.7322287Z Version: 20261103.629
+2026-11-19T06:39:28.7323211Z Commit: 15dbd9ccb5dbf34fae002b6ed1a2670f52df37bc
+2026-11-19T06:39:28.7324146Z Build Date: 2026-11-03T17:26:59Z
+2026-11-19T06:39:28.7325067Z Worker ID: {4a6892ac-0d2f-482a-b9e5-67b8a2e05c04}
+2026-11-19T06:39:28.7326025Z Region: centralus
+2026-11-19T06:39:28.7326746Z Cloud: Azure
+2026-11-19T06:39:28.7327471Z ##[endgroup]
+2026-11-19T06:39:28.7329299Z ##[group]Operating System
+2026-11-19T06:39:28.7330055Z Ubuntu
+2026-11-19T06:39:28.7330770Z 26.04.1
+2026-11-19T06:39:28.7331419Z LTS
+2026-11-19T06:39:28.7332130Z ##[endgroup]
+2026-11-19T06:39:28.7332793Z ##[group]Runner Image
+2026-11-19T06:39:28.7333486Z Image: ubuntu-26.04
+2026-11-19T06:39:28.7334236Z Version: 20261111.196.1
+2026-11-19T06:39:28.7335831Z Included Software: https://github.com/actions/runner-images/blob/ubuntu26/20261111.196/images/ubuntu/Ubuntu2604-Readme.md
+2026-11-19T06:39:28.7338053Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu26%2F20261111.196
+2026-11-19T06:39:28.7339700Z ##[endgroup]
+2026-11-19T06:39:28.7341179Z ##[group]GITHUB_TOKEN Permissions
+2026-11-19T06:39:28.7343391Z Contents: read
+2026-11-19T06:39:28.7344239Z Metadata: read
+2026-11-19T06:39:28.7344916Z ##[endgroup]
+2026-11-19T06:39:28.7347694Z Secret source: Actions
+2026-11-19T06:39:28.7349083Z Cache mode: write
+2026-11-19T06:39:28.7350013Z Prepare workflow directory
+2026-11-19T06:39:28.8035254Z Prepare all required actions
+2026-11-19T06:39:28.8152248Z Getting action download info
+2026-11-19T06:39:29.0606177Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-11-19T06:39:29.1576515Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-11-19T06:39:29.3135477Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-11-19T06:39:29.5779101Z Complete job name: live
+2026-11-19T06:39:29.6484415Z ##[group]Run actions/checkout@v4
+2026-11-19T06:39:29.6485097Z with:
+2026-11-19T06:39:29.6485522Z   repository: flyingmantou/ucas-packetlens-2026
+2026-11-19T06:39:29.6488570Z   token: ***
+2026-11-19T06:39:29.6489083Z   ssh-strict: true
+2026-11-19T06:39:29.6489452Z   ssh-user: git
+2026-11-19T06:39:29.6489821Z   persist-credentials: true
+2026-11-19T06:39:29.6490216Z   clean: true
+2026-11-19T06:39:29.6490578Z   sparse-checkout-cone-mode: true
+2026-11-19T06:39:29.6491003Z   fetch-depth: 1
+2026-11-19T06:39:29.6491350Z   fetch-tags: false
+2026-11-19T06:39:29.6491705Z   show-progress: true
+2026-11-19T06:39:29.6492058Z   lfs: false
+2026-11-19T06:39:29.6492400Z   submodules: false
+2026-11-19T06:39:29.6492772Z   set-safe-directory: true
+2026-11-19T06:39:29.6493179Z   allow-unsafe-pr-checkout: false
+2026-11-19T06:39:29.6493747Z ##[endgroup]
+2026-11-19T06:39:29.8617178Z Syncing repository: flyingmantou/ucas-packetlens-2026
+2026-11-19T06:39:29.8625385Z ##[group]Getting Git version info
+2026-11-19T06:39:29.8627088Z Working directory is '/home/runner/work/ucas-packetlens-2026/ucas-packetlens-2026'
+2026-11-19T06:39:29.8694778Z [command]/usr/bin/git version
+2026-11-19T06:39:29.8696244Z git version 2.56.1
+2026-11-19T06:39:29.8705923Z ##[endgroup]
+2026-11-19T06:39:29.8720767Z Temporarily overriding HOME='/home/runner/work/_temp/a83872f3-d5ac-4899-b502-84427919b9e4' before making global git config changes
+2026-11-19T06:39:29.8722635Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-19T06:39:29.8725232Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/ucas-packetlens-2026/ucas-packetlens-2026
+2026-11-19T06:39:29.8796680Z Deleting the contents of '/home/runner/work/ucas-packetlens-2026/ucas-packetlens-2026'
+2026-11-19T06:39:29.8812315Z ##[group]Initializing the repository
+2026-11-19T06:39:29.8814042Z [command]/usr/bin/git init /home/runner/work/ucas-packetlens-2026/ucas-packetlens-2026
+2026-11-19T06:39:29.8941826Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-11-19T06:39:29.8943990Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-11-19T06:39:29.8946123Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-19T06:39:29.8962711Z hint: call:
+2026-11-19T06:39:29.8963302Z hint:
+2026-11-19T06:39:29.8964012Z hint: 	git config --global init.defaultBranch <name>
+2026-11-19T06:39:29.8964833Z hint:
+2026-11-19T06:39:29.8965584Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-11-19T06:39:29.8967132Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-11-19T06:39:29.8968394Z hint:
+2026-11-19T06:39:29.8969102Z hint: 	git branch -m <name>
+2026-11-19T06:39:29.8969755Z hint:
+2026-11-19T06:39:29.8970524Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-11-19T06:39:29.8971856Z Initialized empty Git repository in /home/runner/work/ucas-packetlens-2026/ucas-packetlens-2026/.git/
+2026-11-19T06:39:29.8974537Z [command]/usr/bin/git remote add origin https://github.com/flyingmantou/ucas-packetlens-2026
+2026-11-19T06:39:29.9122999Z ##[endgroup]
+2026-11-19T06:39:29.9124028Z ##[group]Disabling automatic garbage collection
+2026-11-19T06:39:29.9124980Z [command]/usr/bin/git config --local gc.auto 0
+2026-11-19T06:39:29.9126821Z ##[endgroup]
+2026-11-19T06:39:29.9127718Z ##[group]Setting up auth
+2026-11-19T06:39:29.9129672Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-19T06:39:29.9163978Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-19T06:39:29.9808318Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-19T06:39:29.9812087Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-19T06:39:29.9967737Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-19T06:39:30.0000079Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-19T06:39:30.0238498Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-11-19T06:39:30.0275847Z ##[endgroup]
+2026-11-19T06:39:30.0276771Z ##[group]Fetching the repository
+2026-11-19T06:39:30.0285409Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +a9ac3cf9c4e93887a91b4ec9556a25e59302b134:refs/remotes/origin/main
+2026-11-19T06:39:30.3323699Z From https://github.com/flyingmantou/ucas-packetlens-2026
+2026-11-19T06:39:30.3325461Z  * [new ref]         a9ac3cf9c4e93887a91b4ec9556a25e59302b134 -> origin/main
+2026-11-19T06:39:30.3330276Z ##[endgroup]
+2026-11-19T06:39:30.3331536Z ##[group]Determining the checkout info
+2026-11-19T06:39:30.3332989Z ##[endgroup]
+2026-11-19T06:39:30.3333909Z [command]/usr/bin/git sparse-checkout disable
+2026-11-19T06:39:30.3336518Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-11-19T06:39:30.3355051Z ##[group]Checking out the ref
+2026-11-19T06:39:30.3359534Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2026-11-19T06:39:30.3422686Z Switched to a new branch 'main'
+2026-11-19T06:39:30.3430925Z branch 'main' set up to track 'origin/main'.
+2026-11-19T06:39:30.3436028Z ##[endgroup]
+2026-11-19T06:39:30.3470461Z [command]/usr/bin/git log -1 --format=%H
+2026-11-19T06:39:30.3492287Z a9ac3cf9c4e93887a91b4ec9556a25e59302b134
+2026-11-19T06:39:30.3811600Z ##[group]Run actions/setup-python@v5
+2026-11-19T06:39:30.3812532Z with:
+2026-11-19T06:39:30.3813197Z   python-version: 3.12
+2026-11-19T06:39:30.3814146Z   check-latest: false
+2026-11-19T06:39:30.3821952Z   token: ***
+2026-11-19T06:39:30.3822687Z   update-environment: true
+2026-11-19T06:39:30.3823540Z   allow-prereleases: false
+2026-11-19T06:39:30.3824358Z   freethreaded: false
+2026-11-19T06:39:30.3825083Z ##[endgroup]
+2026-11-19T06:39:30.4980767Z ##[group]Installed versions
+2026-11-19T06:39:30.5054128Z (node:2073) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-19T06:39:30.5057082Z Successfully set up CPython (3.12.16)
+2026-11-19T06:39:30.5072916Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-19T06:39:30.5075453Z ##[endgroup]
+2026-11-19T06:39:30.5319752Z ##[group]Run sudo apt-get update -qq && sudo apt-get install -y libpcap-dev
+2026-11-19T06:39:30.5322377Z [36;1msudo apt-get update -qq && sudo apt-get install -y libpcap-dev[0m
+2026-11-19T06:39:30.5428575Z shell: /usr/bin/bash -e {0}
+2026-11-19T06:39:30.5429718Z env:
+2026-11-19T06:39:30.5430648Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-19T06:39:30.5432095Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib/pkgconfig
+2026-11-19T06:39:30.5433521Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-19T06:39:30.5434806Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-19T06:39:30.5436101Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-19T06:39:30.5437402Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib
+2026-11-19T06:39:30.5438503Z ##[endgroup]
+2026-11-19T06:39:33.9944448Z Reading package lists...
+2026-11-19T06:39:34.1245757Z Building dependency tree...
+2026-11-19T06:39:34.1253120Z Reading state information...
+2026-11-19T06:39:34.2041412Z Solving dependencies...
+2026-11-19T06:39:34.2808347Z The following additional packages will be installed:
+2026-11-19T06:39:34.2828369Z   libdbus-1-dev libibverbs-dev libnl-3-dev libnl-route-3-dev libpcap0.8-dev
+2026-11-19T06:39:34.2829642Z   libsystemd-dev
+2026-11-19T06:39:34.3013049Z The following NEW packages will be installed:
+2026-11-19T06:39:34.3014086Z   libdbus-1-dev libibverbs-dev libnl-3-dev libnl-route-3-dev libpcap-dev
+2026-11-19T06:39:34.3018511Z   libpcap0.8-dev libsystemd-dev
+2026-11-19T06:39:34.3198093Z 0 upgraded, 7 newly installed, 0 to remove and 32 not upgraded.
+2026-11-19T06:39:34.3198818Z Need to get 2930 kB of archives.
+2026-11-19T06:39:34.3199755Z After this operation, 12.5 MB of additional disk space will be used.
+2026-11-19T06:39:34.3202401Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+2026-11-19T06:39:34.3711277Z Get:2 http://azure.archive.ubuntu.com/ubuntu resolute-updates/main amd64v3 libsystemd-dev amd64 259.9-0ubuntu0.1 [1370 kB]
+2026-11-19T06:39:34.4295537Z Get:3 http://azure.archive.ubuntu.com/ubuntu resolute/main amd64v3 libdbus-1-dev amd64 1.16.2-2ubuntu4 [190 kB]
+2026-11-19T06:39:34.4689776Z Get:4 http://azure.archive.ubuntu.com/ubuntu resolute/main amd64v3 libnl-3-dev amd64 3.12.0-2 [105 kB]
+2026-11-19T06:39:34.5135817Z Get:5 http://azure.archive.ubuntu.com/ubuntu resolute/main amd64v3 libnl-route-3-dev amd64 3.12.0-2 [237 kB]
+2026-11-19T06:39:34.5771760Z Get:6 http://azure.archive.ubuntu.com/ubuntu resolute/main amd64v3 libibverbs-dev amd64 61.0-2ubuntu3 [741 kB]
+2026-11-19T06:39:34.6830361Z Get:7 http://azure.archive.ubuntu.com/ubuntu resolute-updates/main amd64v3 libpcap0.8-dev amd64 1.10.6-1ubuntu1.1 [281 kB]
+2026-11-19T06:39:34.8655936Z Get:8 http://azure.archive.ubuntu.com/ubuntu resolute-updates/main amd64v3 libpcap-dev amd64 1.10.6-1ubuntu1.1 [7012 B]
+2026-11-19T06:39:35.2682552Z Fetched 2930 kB in 1s (4861 kB/s)
+2026-11-19T06:39:35.3113005Z Selecting previously unselected package libsystemd-dev:amd64.
+2026-11-19T06:39:35.3310641Z (Reading database ... 
+2026-11-19T06:39:35.3311169Z (Reading database ... 5%
+2026-11-19T06:39:35.3311551Z (Reading database ... 10%
+2026-11-19T06:39:35.3313375Z (Reading database ... 15%
+2026-11-19T06:39:35.3313905Z (Reading database ... 20%
+2026-11-19T06:39:35.3315818Z (Reading database ... 25%
+2026-11-19T06:39:35.3316769Z (Reading database ... 30%
+2026-11-19T06:39:35.3318064Z (Reading database ... 35%
+2026-11-19T06:39:35.3318517Z (Reading database ... 40%
+2026-11-19T06:39:35.3319094Z (Reading database ... 45%
+2026-11-19T06:39:35.3319543Z (Reading database ... 50%
+2026-11-19T06:39:35.4020883Z (Reading database ... 55%
+2026-11-19T06:39:35.6047108Z (Reading database ... 60%
+2026-11-19T06:39:35.7104220Z (Reading database ... 65%
+2026-11-19T06:39:35.8594036Z (Reading database ... 70%
+2026-11-19T06:39:36.0654609Z (Reading database ... 75%
+2026-11-19T06:39:36.1625086Z (Reading database ... 80%
+2026-11-19T06:39:36.3006801Z (Reading database ... 85%
+2026-11-19T06:39:36.4601605Z (Reading database ... 90%
+2026-11-19T06:39:36.5649333Z (Reading database ... 95%
+2026-11-19T06:39:36.5659998Z (Reading database ... 100%
+2026-11-19T06:39:36.5660434Z (Reading database ... 213946 files and directories currently installed.)
+2026-11-19T06:39:36.5692796Z Preparing to unpack .../0-libsystemd-dev_259.9-0ubuntu0.1_amd64v3.deb ...
+2026-11-19T06:39:36.5879286Z Unpacking libsystemd-dev:amd64 (259.9-0ubuntu0.1) ...
+2026-11-19T06:39:37.1210037Z Selecting previously unselected package libdbus-1-dev:amd64.
+2026-11-19T06:39:37.1344911Z Preparing to unpack .../1-libdbus-1-dev_1.16.2-2ubuntu4_amd64v3.deb ...
+2026-11-19T06:39:37.1361218Z Unpacking libdbus-1-dev:amd64 (1.16.2-2ubuntu4) ...
+2026-11-19T06:39:37.1679317Z Selecting previously unselected package libnl-3-dev:amd64.
+2026-11-19T06:39:37.1802506Z Preparing to unpack .../2-libnl-3-dev_3.12.0-2_amd64v3.deb ...
+2026-11-19T06:39:37.1807963Z Unpacking libnl-3-dev:amd64 (3.12.0-2) ...
+2026-11-19T06:39:37.2508739Z Selecting previously unselected package libnl-route-3-dev:amd64.
+2026-11-19T06:39:37.2633408Z Preparing to unpack .../3-libnl-route-3-dev_3.12.0-2_amd64v3.deb ...
+2026-11-19T06:39:37.2640180Z Unpacking libnl-route-3-dev:amd64 (3.12.0-2) ...
+2026-11-19T06:39:37.2964306Z Selecting previously unselected package libibverbs-dev:amd64.
+2026-11-19T06:39:37.3081166Z Preparing to unpack .../4-libibverbs-dev_61.0-2ubuntu3_amd64v3.deb ...
+2026-11-19T06:39:37.3089150Z Unpacking libibverbs-dev:amd64 (61.0-2ubuntu3) ...
+2026-11-19T06:39:37.4296960Z Selecting previously unselected package libpcap0.8-dev:amd64.
+2026-11-19T06:39:37.4419252Z Preparing to unpack .../5-libpcap0.8-dev_1.10.6-1ubuntu1.1_amd64v3.deb ...
+2026-11-19T06:39:37.4451066Z Unpacking libpcap0.8-dev:amd64 (1.10.6-1ubuntu1.1) ...
+2026-11-19T06:39:37.5032822Z Selecting previously unselected package libpcap-dev:amd64.
+2026-11-19T06:39:37.5155855Z Preparing to unpack .../6-libpcap-dev_1.10.6-1ubuntu1.1_amd64v3.deb ...
+2026-11-19T06:39:37.5167713Z Unpacking libpcap-dev:amd64 (1.10.6-1ubuntu1.1) ...
+2026-11-19T06:39:37.5639251Z Setting up libnl-3-dev:amd64 (3.12.0-2) ...
+2026-11-19T06:39:37.5670081Z Setting up libsystemd-dev:amd64 (259.9-0ubuntu0.1) ...
+2026-11-19T06:39:37.5699463Z Setting up libnl-route-3-dev:amd64 (3.12.0-2) ...
+2026-11-19T06:39:37.5725906Z Setting up libdbus-1-dev:amd64 (1.16.2-2ubuntu4) ...
+2026-11-19T06:39:37.7570380Z Setting up libibverbs-dev:amd64 (61.0-2ubuntu3) ...
+2026-11-19T06:39:37.7629099Z Processing triggers for man-db (2.13.1-1build1) ...
+2026-11-19T06:39:37.7659553Z Not building database; man-db/auto-update is not 'true'.
+2026-11-19T06:39:37.7670135Z Processing triggers for sgml-base (1.31+nmu1build1) ...
+2026-11-19T06:39:37.7808206Z Setting up libpcap0.8-dev:amd64 (1.10.6-1ubuntu1.1) ...
+2026-11-19T06:39:37.7828479Z Setting up libpcap-dev:amd64 (1.10.6-1ubuntu1.1) ...
+2026-11-19T06:39:38.2853674Z 
+2026-11-19T06:39:38.2854612Z Running kernel seems to be up-to-date.
+2026-11-19T06:39:38.2856363Z 
+2026-11-19T06:39:38.2856485Z Restarting services...
+2026-11-19T06:39:38.2936913Z 
+2026-11-19T06:39:38.2937725Z Service restarts being deferred:
+2026-11-19T06:39:38.2939169Z  systemctl restart hosted-compute-agent.service
+2026-11-19T06:39:38.2939757Z 
+2026-11-19T06:39:38.2940354Z No containers need to be restarted.
+2026-11-19T06:39:38.2940769Z 
+2026-11-19T06:39:38.2941386Z No user sessions are running outdated binaries.
+2026-11-19T06:39:38.2942152Z 
+2026-11-19T06:39:38.2942844Z No VM guests are running outdated hypervisor (qemu) binaries on this host.
+2026-11-19T06:39:39.0585562Z ##[group]Run python -m pip install -r requirements.txt
+2026-11-19T06:39:39.0585900Z [36;1mpython -m pip install -r requirements.txt[0m
+2026-11-19T06:39:39.0631729Z shell: /usr/bin/bash -e {0}
+2026-11-19T06:39:39.0631936Z env:
+2026-11-19T06:39:39.0632171Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-19T06:39:39.0632521Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib/pkgconfig
+2026-11-19T06:39:39.0632857Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-19T06:39:39.0633179Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-19T06:39:39.0633476Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-19T06:39:39.0633776Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib
+2026-11-19T06:39:39.0634030Z ##[endgroup]
+2026-11-19T06:39:39.8393438Z Collecting psutil<8,>=5.9 (from -r requirements.txt (line 2))
+2026-11-19T06:39:39.8890431Z   Downloading psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl.metadata (22 kB)
+2026-11-19T06:39:39.9137489Z Downloading psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl (155 kB)
+2026-11-19T06:39:40.0033522Z Installing collected packages: psutil
+2026-11-19T06:39:40.0649951Z Successfully installed psutil-7.2.2
+2026-11-19T06:39:40.1028172Z ##[group]Run sudo "$(which python)" scripts/live_demo.py
+2026-11-19T06:39:40.1028512Z [36;1msudo "$(which python)" scripts/live_demo.py[0m
+2026-11-19T06:39:40.1073088Z shell: /usr/bin/bash -e {0}
+2026-11-19T06:39:40.1073301Z env:
+2026-11-19T06:39:40.1073535Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-19T06:39:40.1073890Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib/pkgconfig
+2026-11-19T06:39:40.1074227Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-19T06:39:40.1074552Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-19T06:39:40.1074849Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-19T06:39:40.1075149Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib
+2026-11-19T06:39:40.1075406Z ##[endgroup]
+2026-11-19T06:39:42.0273041Z LIVE_RESULT_JSON={"kind": "real libpcap capture of self-generated loopback traffic", "platform": "Linux-7.0.0-1019-azure-x86_64-with-glibc2.43", "python": "3.12.16 (main, Oct 26 2026, 02:48:44) [GCC 15.2.0]", "libpcap": "libpcap version 1.10.6 (64-bit time_t, with TPACKET_V3)", "interface": "lo", "bpf": "tcp port 33589 or udp port 40978", "pid": 2411, "packet_count": 12, "tcp_streams": 1, "protocols": {"HTTP": 2, "TCP": 8, "UDP": 2}, "checks": {"actual_packets": true, "http_request": true, "http_response": true, "udp_roundtrip": true, "process_attribution": true, "stopped_cleanly": true}, "statistics": {"available": true, "received": 24, "kernel_dropped": 0, "interface_dropped": 0, "process_status": "连接快照可用", "queue_dropped": 0}, "stream_text": "TCP stream 0 | packets=10 bytes=798\n\n127.0.0.1:48388 → 127.0.0.1:33589\nduplicate_bytes=0, conflict_bytes=0, omitted_bytes=0\nGET /live-proof HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n\n\n127.0.0.1:33589 → 127.0.0.1:48388\nduplicate_bytes=0, conflict_bytes=0, omitted_bytes=0\nHTTP/1.1 200 OK\r\nContent-Length: 18\r\n\r\nPacketLens-live-OK!"}
+2026-11-19T06:39:42.0286537Z LIVE_PCAP_BASE64=1MOyoQIABAAAAAAAAAAAAP//AAABAAAArJn+aubPBABKAAAASgAAAAAAAAAAAAAAAAAAAAgARQAAPCq8QABABhH+fwAAAX8AAAG9BIM1RbL8EwAAAACgAv/X/jAAAAIE/9cEAggKljc0WQAAAAABAwMKrJn+avfPBABKAAAASgAAAAAAAAAAAAAAAAAAAAgARQAAPAAAQABABjy6fwAAAX8AAAGDNb0EUvmkDUWy/BSgEv/L/jAAAAIE/9cEAggK6HuF1ZY3NFkBAwMKrJn+agXQBABCAAAAQgAAAAAAAAAAAAAAAAAAAAgARQAANCq9QABABhIFfwAAAX8AAAG9BIM1RbL8FFL5pA6AEABA/igAAAEBCAqWNzRZ6HuF1a2Z/moDZwkAggAAAIIAAAAAAAAAAAAAAAAAAAAIAEUAAHQqvkAAQAYRxH8AAAF/AAABvQSDNUWy/BRS+aQOgBgAQP5oAAABAQgKljc5buh7hdVHRVQgL2xpdmUtcHJvb2YgSFRUUC8xLjENCkhvc3Q6IGxvY2FsaG9zdA0KQ29ubmVjdGlvbjogY2xvc2UNCg0KrZn+ahNnCQBCAAAAQgAAAAAAAAAAAAAAAAAAAAgARQAANL/4QABABnzJfwAAAX8AAAGDNb0EUvmkDkWy/FSAEABA/igAAAEBCAroe4rqljc5bq2Z/mosZwkAfAAAAHwAAAAAAAAAAAAAAAAAAAAIAEUAAG6/+UAAQAZ8jn8AAAF/AAABgzW9BFL5pA5FsvxUgBgAQP5iAAABAQgK6HuK6pY3OW5IVFRQLzEuMSAyMDAgT0sNCkNvbnRlbnQtTGVuZ3RoOiAxOA0KDQpQYWNrZXRMZW5zLWxpdmUtT0shrZn+ajBnCQBCAAAAQgAAAAAAAAAAAAAAAAAAAAgARQAANCq/QABABhIDfwAAAX8AAAG9BIM1RbL8VFL5pEiAEABA/igAAAEBCAqWNzlu6HuK6q2Z/mpsZwkAPgAAAD4AAAAAAAAAAAAAAAAAAAAIAEUAADCvukAAQBGNAH8AAAF/AAABv1CgEgAc/i9QYWNrZXRMZW5zLXVkcC1wcm9vZq2Z/mp/ZwkAPgAAAD4AAAAAAAAAAAAAAAAAAAAIAEUAADCvu0AAQBGM/38AAAF/AAABoBK/UAAc/i9QYWNrZXRMZW5zLXVkcC1wcm9vZq2Z/mqRZwkAQgAAAEIAAAAAAAAAAAAAAAAAAAAIAEUAADQqwEAAQAYSAn8AAAF/AAABvQSDNUWy/FRS+aRIgBEAQP4oAAABAQgKljc5buh7iuqtmf5qoWcJAEIAAABCAAAAAAAAAAAAAAAAAAAACABFAAA0v/pAAEAGfMd/AAABfwAAAYM1vQRS+aRIRbL8VYARAED+KAAAAQEICuh7iuqWNzlurZn+arFnCQBCAAAAQgAAAAAAAAAAAAAAAAAAAAgARQAANCrBQABABhIBfwAAAX8AAAG9BIM1RbL8VVL5pEmAEABA/igAAAEBCAqWNzlu6HuK6g==
+2026-11-19T06:39:42.0433272Z ##[group]Run actions/upload-artifact@v4
+2026-11-19T06:39:42.0433505Z with:
+2026-11-19T06:39:42.0433681Z   name: real-live-capture
+2026-11-19T06:39:42.0433949Z   path: evidence/live-results.json
+evidence/live-loopback.pcap
+
+2026-11-19T06:39:42.0434249Z   if-no-files-found: warn
+2026-11-19T06:39:42.0434453Z   compression-level: 6
+2026-11-19T06:39:42.0434635Z   overwrite: false
+2026-11-19T06:39:42.0434814Z   include-hidden-files: false
+2026-11-19T06:39:42.0435005Z env:
+2026-11-19T06:39:42.0435228Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-19T06:39:42.0435571Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib/pkgconfig
+2026-11-19T06:39:42.0435905Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-19T06:39:42.0436203Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-19T06:39:42.0436495Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-19T06:39:42.0436824Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib
+2026-11-19T06:39:42.0437102Z ##[endgroup]
+2026-11-19T06:39:42.1817097Z (node:2419) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-19T06:39:42.1818241Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-19T06:39:42.1912915Z Multiple search paths detected. Calculating the least common ancestor of all paths
+2026-11-19T06:39:42.1945898Z The least common ancestor is /home/runner/work/ucas-packetlens-2026/ucas-packetlens-2026/evidence. This will be the root directory of the artifact
+2026-11-19T06:39:42.1946981Z With the provided path, there will be 2 files uploaded
+2026-11-19T06:39:42.1983342Z Artifact name is valid!
+2026-11-19T06:39:42.1994787Z Root directory input is valid!
+2026-11-19T06:39:42.5725259Z Beginning upload of artifact content to blob storage
+2026-11-19T06:39:42.6336834Z (node:2419) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-11-19T06:39:42.8234462Z Uploaded bytes 1441
+2026-11-19T06:39:42.8828277Z Finished uploading artifact content to blob storage!
+2026-11-19T06:39:42.8828778Z SHA256 digest of uploaded artifact zip is 63015d6a5b4247cc6272ebf60e6f8fcfe05d43458132ae14c6a8e6bfad461b77
+2026-11-19T06:39:42.8838707Z Finalizing artifact upload
+2026-11-19T06:39:43.2302164Z Artifact real-live-capture.zip successfully finalized. Artifact ID 14505407276
+2026-11-19T06:39:43.2303219Z Artifact real-live-capture has been successfully uploaded! Final size is 1441 bytes. Artifact ID is 14505407276
+2026-11-19T06:39:43.2304497Z Artifact download URL: https://github.com/flyingmantou/ucas-packetlens-2026/actions/runs/44473755061/artifacts/14505407276
+2026-11-19T06:39:43.2467584Z Post job cleanup.
+2026-11-19T06:39:43.3470398Z (node:2434) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-19T06:39:43.3471784Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-19T06:39:43.3664741Z Post job cleanup.
+2026-11-19T06:39:43.5099490Z [command]/usr/bin/git version
+2026-11-19T06:39:43.5100931Z git version 2.56.1
+2026-11-19T06:39:43.5162234Z Temporarily overriding HOME='/home/runner/work/_temp/33027096-836e-4856-97e4-02a9c3a54f31' before making global git config changes
+2026-11-19T06:39:43.5163513Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-19T06:39:43.5164883Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/ucas-packetlens-2026/ucas-packetlens-2026
+2026-11-19T06:39:43.5212029Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-19T06:39:43.5301132Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-19T06:39:43.5632425Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-19T06:39:43.5706473Z http.https://github.com/.extraheader
+2026-11-19T06:39:43.5743679Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-11-19T06:39:43.5771594Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-19T06:39:43.6074811Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-19T06:39:43.6111879Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-19T06:39:43.6658774Z Cleaning up orphan processes
+2026-11-19T06:39:43.6943994Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

@@ -1,0 +1,40 @@
+{
+  "repository": "https://github.com/flyingmantou/ucas-packetlens-2026",
+  "run_id": 44474335061,
+  "run_url": "https://github.com/flyingmantou/ucas-packetlens-2026/actions/runs/44474335061",
+  "tested_commit": "ae07d7d2991f1fbc3e9e1cf6da595b5dc30cd1e4",
+  "jobs": [
+    {
+      "name": "offline (windows-latest)",
+      "id": 135391104749,
+      "status": "success",
+      "tests": 56,
+      "passed": 55,
+      "skipped": 1
+    },
+    {
+      "name": "offline (ubuntu-latest)",
+      "id": 135391104988,
+      "status": "success",
+      "tests": 56,
+      "passed": 56,
+      "skipped": 0
+    },
+    {
+      "name": "offline (macos-latest)",
+      "id": 135391105010,
+      "status": "success",
+      "tests": 56,
+      "passed": 56,
+      "skipped": 0
+    },
+    {
+      "name": "live",
+      "id": 135391105269,
+      "status": "success",
+      "skipped": 0
+    }
+  ],
+  "initial_live_evidence_run": 44473755061,
+  "note": "The bundled live PCAP comes from run 1; run 4 repeats all six checks successfully."
+}

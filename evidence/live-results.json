@@ -1,0 +1,33 @@
+{
+  "kind": "real libpcap capture of self-generated loopback traffic",
+  "platform": "Linux-7.0.0-1019-azure-x86_64-with-glibc2.43",
+  "python": "3.12.16 (main, Oct 26 2026, 02:48:44) [GCC 15.2.0]",
+  "libpcap": "libpcap version 1.10.6 (64-bit time_t, with TPACKET_V3)",
+  "interface": "lo",
+  "bpf": "tcp port 33589 or udp port 40978",
+  "pid": 2411,
+  "packet_count": 12,
+  "tcp_streams": 1,
+  "protocols": {
+    "HTTP": 2,
+    "TCP": 8,
+    "UDP": 2
+  },
+  "checks": {
+    "actual_packets": true,
+    "http_request": true,
+    "http_response": true,
+    "udp_roundtrip": true,
+    "process_attribution": true,
+    "stopped_cleanly": true
+  },
+  "statistics": {
+    "available": true,
+    "received": 24,
+    "kernel_dropped": 0,
+    "interface_dropped": 0,
+    "process_status": "连接快照可用",
+    "queue_dropped": 0
+  },
+  "stream_text": "TCP stream 0 | packets=10 bytes=798\n\n127.0.0.1:48388 → 127.0.0.1:33589\nduplicate_bytes=0, conflict_bytes=0, omitted_bytes=0\nGET /live-proof HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n\n\n127.0.0.1:33589 → 127.0.0.1:48388\nduplicate_bytes=0, conflict_bytes=0, omitted_bytes=0\nHTTP/1.1 200 OK\r\nContent-Length: 18\r\n\r\nPacketLens-live-OK!"
+}

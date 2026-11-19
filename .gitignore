@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.venv/
+runtime/
+output/video-frames/
+.DS_Store
+
+source-history.bundle
