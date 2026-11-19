@@ -1,2 +1,3 @@
 """PacketLens - educational libpcap sniffer and protocol analyzer."""
-__version__ = '1.0.0'
+
+__version__ = "1.0.0"
