@@ -35,7 +35,7 @@ class Worker:
                 self.status = "正在实时抓包"
                 self.ready.set()
                 while not self.stop_event.is_set():
-                    if time.monotonic() - processes.updated > 1:
+                    if time.monotonic() - processes.updated > processes.refresh_interval:
                         processes.refresh()
                     item = cap.read()
                     if item is None:

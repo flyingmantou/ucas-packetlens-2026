@@ -4,8 +4,13 @@ import ipaddress
 import re
 
 TOKEN = re.compile(r'\s*(>=|<=|==|!=|>|<|\(|\)|"[^"\r\n]*"|[^\s()=!<>]+)')
-PROTOCOLS = set("ethernet arp ip ipv4 ipv6 tcp udp icmp icmpv6 http dns tls".split())
-FIELDS = set("ip.addr ip.src ip.dst tcp.port udp.port port len stream pid".split())
+PROTOCOLS = set(
+    "ethernet arp ip ipv4 ipv6 tcp udp icmp icmpv6 http dns tls trojan anytls proxy suspect_trojan suspect_anytls".split()
+)
+NUMERIC_FIELDS = set("tcp.port udp.port port len stream pid".split())
+IP_FIELDS = set("ip.addr ip.src ip.dst".split())
+STRING_FIELDS = set("tls.sni tls.ja3 process".split())
+FIELDS = NUMERIC_FIELDS | IP_FIELDS | STRING_FIELDS
 
 
 def compile_filter(source):
@@ -61,9 +66,34 @@ def compile_filter(source):
             raise ValueError(f"未知字段 {t}")
         op = take()
         v = take()
+
+        if t in STRING_FIELDS:
+            if op not in ("==", "!=", "contains"):
+                raise ValueError("字符串字段只支持 ==、!= 或 contains")
+            if v.startswith('"') and v.endswith('"'):
+                v = v[1:-1]
+            v_low = v.lower()
+
+            def test_str(p):
+                actual = {
+                    "tls.sni": p.sni,
+                    "tls.ja3": p.ja3,
+                    "process": p.process,
+                }[t]
+                if not actual:
+                    return False
+                a_low = actual.lower()
+                if op == "==":
+                    return a_low == v_low
+                if op == "!=":
+                    return a_low != v_low
+                return v_low in a_low
+
+            return test_str
+
         if op not in ("==", "!=", ">", "<", ">=", "<="):
             raise ValueError("需要比较运算符")
-        if t.startswith("ip."):
+        if t in IP_FIELDS:
             if op not in ("==", "!="):
                 raise ValueError("IP 地址只支持 == 或 !=")
             try:

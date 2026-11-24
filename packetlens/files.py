@@ -57,7 +57,7 @@ def write_pcap(path, packets, linktype=None):
     with open(path, "wb") as f:
         f.write(struct.pack("<IHHIIII", 0xA1B2C3D4, 2, 4, 0, 0, 65535, link))
         for p in packets:
-            sec = int(p.timestamp)
-            micro = int((p.timestamp - sec) * 1e6)
+            sec = max(0, int(p.timestamp))
+            micro = max(0, min(999999, int(round((p.timestamp - sec) * 1e6))))
             f.write(struct.pack("<IIII", sec, micro, len(p.raw), p.wirelen))
             f.write(p.raw)

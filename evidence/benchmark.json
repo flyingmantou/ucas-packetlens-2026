@@ -3,14 +3,14 @@
   "kind": "offline decode + display filter + stream indexing; excludes GUI and reassembly rendering",
   "packets_per_trial": 5000,
   "trials_seconds": [
-    0.03837175015360117,
-    0.03653041739016771,
-    0.03670899989083409,
-    0.036309500224888325,
-    0.03614912508055568
+    0.07395191600517137,
+    0.07496691700362135,
+    0.07768470799783245,
+    0.07701987500331597,
+    0.07991679100086913
   ],
-  "median_seconds": 0.03653041739016771,
-  "median_packets_per_second": 136872,
-  "matched": 3127,
-  "fixture": "16 deterministic course-demo frames repeated in fixed order"
+  "median_seconds": 0.07701987500331597,
+  "median_packets_per_second": 64918,
+  "matched": 1939,
+  "fixture": "31 deterministic course-demo frames repeated in fixed order"
 }

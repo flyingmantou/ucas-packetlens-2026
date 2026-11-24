@@ -13,7 +13,23 @@ class CaptureError(RuntimeError):
 
 
 class Timeval(C.Structure):
-    _fields_ = [("sec", C.c_long), ("usec", C.c_long)]
+    # macOS 64-bit defines __darwin_suseconds_t as 32-bit int32 with 4-byte tail padding;
+    # Linux (LP64) uses 64-bit long and Windows (LLP64) uses 32-bit long for both fields.
+    _fields_ = [
+        ("sec", C.c_long),
+        ("usec", C.c_int32 if sys.platform == "darwin" else C.c_long),
+    ]
+
+
+def _decode_cstr(raw):
+    if not raw:
+        return ""
+    for enc in ("utf-8", "gbk" if sys.platform == "win32" else "latin-1"):
+        try:
+            return raw.decode(enc)
+        except UnicodeDecodeError:
+            continue
+    return raw.decode("utf-8", errors="replace")
 
 
 class Header(C.Structure):
@@ -118,7 +134,7 @@ class Library:
         head = C.POINTER(Device)()
         err = C.create_string_buffer(256)
         if self.find(C.byref(head), err) < 0:
-            raise CaptureError(err.value.decode(errors="replace"))
+            raise CaptureError(_decode_cstr(err.value))
         result = []
         try:
             p = head
@@ -126,8 +142,8 @@ class Library:
                 d = p.contents
                 result.append(
                     {
-                        "name": d.name.decode(errors="replace"),
-                        "description": (d.description or b"").decode(errors="replace"),
+                        "name": _decode_cstr(d.name),
+                        "description": _decode_cstr(d.description),
                         "loopback": bool(d.flags & 1),
                     }
                 )

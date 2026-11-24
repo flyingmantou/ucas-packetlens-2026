@@ -7,10 +7,21 @@ import unittest
 from packetlens.decode import decode, dns_name
 from packetlens.files import read_pcap, write_pcap
 from packetlens.filters import compile_filter
+from packetlens.intel import analyze_security
 from packetlens.streams import StreamTable
-from packetlens.pcap import Library, CaptureError
+from packetlens.pcap import Library, CaptureError, Timeval
 from packetlens.processes import ProcessMap
-from .fixtures import frame, dns, demo_frames
+from .fixtures import (
+    frame,
+    dns,
+    demo_frames,
+    tls_client_hello,
+    tls_server_hello,
+    tls_app_record,
+    trojan_header,
+    anytls_frame,
+    anytls_auth_and_settings,
+)
 
 
 def packet(payload=b"", **kw):
@@ -343,6 +354,140 @@ class ProcessTests(unittest.TestCase):
         m = ProcessMap(fail)
         m.refresh()
         self.assertIn("不可用", m.status)
+
+
+class AdvancedProtocolAndIntelTests(unittest.TestCase):
+    def test_tls_client_hello_sni_alpn_ja3(self):
+        p = packet(
+            tls_client_hello(sni="github.com", alpn=("h2", "http/1.1")), dport=443
+        )
+        self.assertEqual(p.protocol, "TLS")
+        self.assertEqual(p.sni, "github.com")
+        self.assertEqual(p.alpn, ["h2", "http/1.1"])
+        self.assertEqual(len(p.ja3), 32)
+        self.assertEqual(p.tls_version, "TLS 1.3")
+        self.assertIn("SNI=github.com", p.info)
+
+    def test_tls_multi_record_parsing(self):
+        p = packet(tls_app_record(40) + tls_app_record(450) + tls_app_record(620), dport=443)
+        self.assertEqual(p.protocol, "TLS")
+        self.assertEqual([r["length"] for r in p.tls_records], [40, 450, 620])
+
+    def test_trojan_deterministic_domain_and_ipv4(self):
+        p = packet(trojan_header(target_host="example.org", target_port=443), dport=443)
+        self.assertEqual(p.protocol, "Trojan")
+        self.assertIn("trojan", p.layers)
+        self.assertEqual(p.details["Trojan"]["target_host"], "example.org")
+        self.assertEqual(p.details["Trojan"]["target_port"], 443)
+
+        p4 = packet(trojan_header(target_host="93.184.216.34", target_port=80), dport=443)
+        self.assertEqual(p4.protocol, "Trojan")
+        self.assertEqual(p4.details["Trojan"]["target_host"], "93.184.216.34")
+
+    def test_trojan_rejects_non_trojan_hex_text(self):
+        p = packet(b"a" * 56 + b"\r\n\x99\x01\x01\x02\x03\x04\x00\x50\r\n", dport=443)
+        self.assertEqual(p.protocol, "TCP")
+
+    def test_anytls_deterministic_auth_and_frames(self):
+        p = packet(anytls_auth_and_settings(pad_len=30), dport=8443)
+        self.assertEqual(p.protocol, "AnyTLS")
+        self.assertIn("anytls", p.layers)
+        self.assertTrue(p.details["AnyTLS"]["auth_prologue"])
+        self.assertEqual(p.details["AnyTLS"]["initial_padding_bytes"], 30)
+        self.assertEqual(p.details["AnyTLS"]["settings"]["v"], "2")
+
+        # Standalone padding scheme update frame
+        scheme = b"stop=8\n0=30-30\n1=100-400\n"
+        p2 = packet(anytls_frame(6, 0, scheme), dport=8443)
+        self.assertEqual(p2.protocol, "AnyTLS")
+        self.assertEqual(p2.details["AnyTLS"]["frames"][0]["cmd_name"], "cmdUpdatePaddingScheme")
+
+    def test_anytls_rejects_random_binary(self):
+        p = packet(b"\x01\x00\x00\x00\x01\x00\x05hello", dport=8443)
+        self.assertEqual(p.protocol, "TCP")
+
+    def test_encrypted_trojan_vs_anytls_vs_normal_https(self):
+        table = StreamTable()
+        for i, raw in enumerate(demo_frames(), 1):
+            p = decode(1000.0 + i * 0.05, raw, number=i)
+            table.add(p)
+        table.finalize_intel()
+
+        by_sni = {s.tls_sni: s.intel for s in table.streams if s.tls_sni}
+        self.assertEqual(by_sni["www.ucas.ac.cn"]["proxy_family"], "")
+        self.assertEqual(by_sni["edge.trojan-demo.test"]["proxy_family"], "Trojan")
+        self.assertEqual(by_sni["edge.trojan-demo.test"]["detection_mode"], "heuristic")
+        self.assertGreaterEqual(by_sni["edge.trojan-demo.test"]["confidence"], 55)
+        self.assertEqual(by_sni["cdn.anytls-demo.test"]["proxy_family"], "AnyTLS")
+        self.assertEqual(by_sni["cdn.anytls-demo.test"]["detection_mode"], "heuristic")
+        self.assertGreaterEqual(by_sni["cdn.anytls-demo.test"]["confidence"], 55)
+
+    def test_new_display_filters_and_process_summary(self):
+        table = StreamTable()
+        pkts = []
+        for i, raw in enumerate(demo_frames(), 1):
+            p = decode(1000.0 + i * 0.05, raw, number=i)
+            if p.dport == 443 and p.sni == "www.ucas.ac.cn":
+                p.pid = 4242
+                p.process = "curl"
+            table.add(p)
+            pkts.append(p)
+        table.finalize_intel()
+
+        self.assertTrue(any(compile_filter('tls.sni == "www.ucas.ac.cn"')(p) for p in pkts))
+        self.assertTrue(any(compile_filter('tls.sni contains "trojan"')(p) for p in pkts))
+        self.assertTrue(any(compile_filter('process == "curl"')(p) for p in pkts))
+        self.assertTrue(any(compile_filter("proxy")(p) for p in pkts))
+        self.assertTrue(any(compile_filter("trojan")(p) for p in pkts))
+        self.assertTrue(any(compile_filter("anytls")(p) for p in pkts))
+
+        summary = table.process_summary()
+        self.assertTrue(any(g["pid"] == 4242 and g["name"] == "curl" for g in summary))
+
+    def test_security_alerts(self):
+        pkts = []
+        table = StreamTable()
+        # Cleartext HTTP Basic Auth + SYN port scan (5 ports) + ARP spoofing + TCP conflict
+        scan_frames = [
+            frame(
+                b"GET /login HTTP/1.1\r\nAuthorization: Basic dGVzdDp0ZXN0\r\n\r\n",
+                dport=80,
+                sport=40000,
+                seq=1,
+            ),
+            frame(b"abc", sport=41000, dport=8080, seq=10),
+            frame(b"aXc", sport=41000, dport=8080, seq=10),
+        ] + [
+            frame(b"", src="10.0.0.99", dst="10.0.0.2", sport=42000 + i, dport=20 + i, flags=2, seq=1)
+            for i in range(6)
+        ]
+        arp1 = (
+            bytes(12) + b"\x08\x06" + struct.pack("!HHBBH", 1, 0x800, 6, 4, 2)
+            + b"\xaa\xaa\xaa\xaa\xaa\x01" + b"\x0a\x00\x00\x05"
+            + bytes(6) + b"\x0a\x00\x00\x01"
+        )
+        arp2 = (
+            bytes(12) + b"\x08\x06" + struct.pack("!HHBBH", 1, 0x800, 6, 4, 2)
+            + b"\xbb\xbb\xbb\xbb\xbb\x02" + b"\x0a\x00\x00\x05"
+            + bytes(6) + b"\x0a\x00\x00\x01"
+        )
+        for i, raw in enumerate(scan_frames + [arp1, arp2], 1):
+            p = decode(1.0 + i * 0.01, raw, number=i)
+            table.add(p)
+            pkts.append(p)
+        table.finalize_intel()
+        alerts = analyze_security(pkts, table)
+        cats = {a["category"] for a in alerts}
+        self.assertIn("明文凭据泄露", cats)
+        self.assertIn("疑似端口扫描", cats)
+        self.assertIn("疑似 ARP 欺骗", cats)
+        self.assertIn("TCP 重叠冲突", cats)
+
+    def test_macos_timeval_abi(self):
+        import ctypes, sys
+        if sys.platform == "darwin":
+            self.assertEqual(ctypes.sizeof(Timeval), 16)
+            self.assertEqual(Timeval.usec.size, 4)
 
 
 if __name__ == "__main__":

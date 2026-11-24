@@ -7,8 +7,9 @@ from packetlens.decode import decode
 from packetlens.files import write_pcap
 
 root = Path(__file__).resolve().parents[1]
+frames = demo_frames()
 write_pcap(
     root / "samples/course-demo.pcap",
-    [decode(1795046400 + i * 0.05, b) for i, b in enumerate(demo_frames())],
+    [decode(1795046400 + i * 0.05, b) for i, b in enumerate(frames)],
 )
-print("Generated 16 synthetic packets; no third-party traffic.")
+print(f"Generated {len(frames)} synthetic packets (HTTP/DNS/ICMP/IPv6/TLS/Trojan/AnyTLS); no third-party traffic.")

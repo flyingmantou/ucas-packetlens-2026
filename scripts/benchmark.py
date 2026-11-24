@@ -31,7 +31,7 @@ record = {
     "median_seconds": statistics.median(times),
     "median_packets_per_second": round(count / statistics.median(times)),
     "matched": matches,
-    "fixture": "16 deterministic course-demo frames repeated in fixed order",
+    "fixture": f"{len(frames)} deterministic course-demo frames repeated in fixed order",
 }
 (root / "evidence/benchmark.json").write_text(
     json.dumps(record, indent=2), encoding="utf-8"
