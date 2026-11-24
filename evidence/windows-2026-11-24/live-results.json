@@ -1,0 +1,33 @@
+{
+  "kind": "real libpcap capture of self-generated loopback traffic",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)]",
+  "libpcap": "Npcap version 1.60, based on libpcap version 1.10.2-PRE-GIT",
+  "interface": "\\Device\\NPF_Loopback",
+  "bpf": "tcp port 64052 or udp port 59755",
+  "pid": 31892,
+  "packet_count": 13,
+  "tcp_streams": 1,
+  "protocols": {
+    "HTTP": 2,
+    "TCP": 9,
+    "UDP": 2
+  },
+  "checks": {
+    "actual_packets": true,
+    "http_request": true,
+    "http_response": true,
+    "udp_roundtrip": true,
+    "process_attribution": true,
+    "stopped_cleanly": true
+  },
+  "statistics": {
+    "available": true,
+    "received": 137,
+    "kernel_dropped": 0,
+    "interface_dropped": 0,
+    "process_status": "连接快照可用",
+    "queue_dropped": 0
+  },
+  "stream_text": "TCP stream 0 | packets=11 bytes=630 | protocol=HTTP/1.x | process=python.exe(31892)\n\n127.0.0.1:64053 → 127.0.0.1:64052\nduplicate_bytes=0, conflict_bytes=0, omitted_bytes=0\nGET /live-proof HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n\n\n127.0.0.1:64052 → 127.0.0.1:64053\nduplicate_bytes=0, conflict_bytes=0, omitted_bytes=0\nHTTP/1.1 200 OK\r\nContent-Length: 18\r\n\r\nPacketLens-live-OK!"
+}

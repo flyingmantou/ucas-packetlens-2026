@@ -46,8 +46,11 @@ python3.12 run.py --open samples/course-demo.pcap
 
 | 版本和环境 | 实际结果 |
 | --- | --- |
+| 11 月 24 日，Windows 11，源码 [`7e56399`](https://github.com/flyingmantou/ucas-packetlens-2026/commit/7e56399da2198eb7e6d30675b5524c08093f3019) | Python 3.12.3、Npcap 1.60。[66 项自动化测试](evidence/windows-2026-11-24/test-results.json)全部通过，跳过 0 项。图形界面载入课程样例后显示 31 个报文，应用 `http` 过滤后显示 2 个。 |
 | 11 月 24 日源码，macOS | 本机 62 项自动化测试全部通过。 |
 | 11 月 19 日版本，Windows | 56 项中 55 项通过。测试机未安装 Npcap，跳过了 1 项依赖它的原生过滤器测试。 |
 | 11 月 19 日版本，Linux | 在回环接口实际抓到 12 个报文。该记录保存在 `evidence/live-loopback.pcap`，可在其他系统离线打开。 |
 
-11 月 24 日源码已接入 Windows 的 Npcap 接口，尚无该版本在 Windows 上实时抓包的实测记录。要在目标机复核自动化用例，可运行 `py -3.12 scripts/run_tests.py`（macOS 或 Linux 使用 `python3.12`）。[跨平台测试记录](https://github.com/flyingmantou/ucas-packetlens-2026/actions/runs/44474335061)
+Windows 回环接口捕获了 13 个自生成的报文。回放时可在同一条 TCP 流中看到 `GET /live-proof HTTP/1.1` 请求和 `HTTP/1.1 200 OK` 响应。UDP 往返、进程归属和正常停止检查均通过，内核和程序队列丢包数均为 0。[实抓记录](evidence/windows-2026-11-24/live-results.json) · [原始 PCAP](evidence/windows-2026-11-24/live-loopback.pcap)
+
+要在目标机复核自动化用例，可运行 `py -3.12 scripts/run_tests.py`（macOS 或 Linux 使用 `python3.12`）。[跨平台测试记录](https://github.com/flyingmantou/ucas-packetlens-2026/actions/runs/44474335061)

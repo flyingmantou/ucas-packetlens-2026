@@ -1,0 +1,11 @@
+{
+  "python": "3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "psutil": "5.9.0",
+  "libpcap": "Npcap version 1.60, based on libpcap version 1.10.2-PRE-GIT",
+  "tests": 66,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "elapsed_seconds": 0.265
+}
