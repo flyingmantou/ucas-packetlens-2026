@@ -12,4 +12,4 @@ write_pcap(
     root / "samples/course-demo.pcap",
     [decode(1795046400 + i * 0.05, b) for i, b in enumerate(frames)],
 )
-print(f"Generated {len(frames)} synthetic packets (HTTP/DNS/ICMP/IPv6/TLS/Trojan/AnyTLS); no third-party traffic.")
+print(f"Generated {len(frames)} synthetic packets (HTTP/DNS/ICMP/IPv6/TLS); no third-party traffic.")

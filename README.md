@@ -20,6 +20,8 @@ py -3.12 run.py --open samples/course-demo.pcap
 
 **演示协议分析（NPA）。** 从「文件 → 打开 Linux 实测 PCAP」载入随包附带的真实抓包记录。在「显示过滤」输入 `http` 并点击「应用」，选中一条 HTTP 报文，再点「追踪 TCP 流」。窗口中可以读到请求 `GET /live-proof HTTP/1.1` 和响应 `HTTP/1.1 200 OK`。
 
+要演示 TLS 握手，可点「文件 → 打开课程示例」，在「显示过滤」输入 `tls.sni == "www.ucas.ac.cn"`，点击「应用」并选中报文，在 TLS 详情中查看域名、ALPN 和 JA3 指纹。
+
 **演示实时抓包（NPS）。** 先在这台 Windows 电脑上安装 Npcap，再重新打开 PacketLens。选择正在使用的 Wi-Fi 或以太网卡，点「开始抓包」，用浏览器访问一个网页，观察报文列表，再点「停止」。如果安装 Npcap 时选择了仅管理员可用，抓包时需要管理员授权。[Npcap 官方安装说明](https://npcap.com/guide/npcap-users-guide.html)
 
 **需要显示本机进程时**，在同一文件夹运行以下命令，再用虚拟环境中的 Python 启动程序。安装的 `psutil` 用于将实时 TCP 连接匹配到进程。普通 PCAP 文件里没有历史进程号。
@@ -44,7 +46,7 @@ python3.12 run.py --open samples/course-demo.pcap
 
 | 版本和环境 | 实际结果 |
 | --- | --- |
-| 11 月 24 日源码，macOS | 本机 66 项自动化测试通过。 |
+| 11 月 24 日源码，macOS | 本机 62 项自动化测试全部通过。 |
 | 11 月 19 日版本，Windows | 56 项中 55 项通过。测试机未安装 Npcap，跳过了 1 项依赖它的原生过滤器测试。 |
 | 11 月 19 日版本，Linux | 在回环接口实际抓到 12 个报文。该记录保存在 `evidence/live-loopback.pcap`，可在其他系统离线打开。 |
 

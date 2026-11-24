@@ -1,4 +1,4 @@
-"""Bounded, defensive decoding with TLS SNI/JA3, Trojan, and AnyTLS dissection."""
+"""Bounded, defensive decoding with TLS handshake and record parsing."""
 
 from dataclasses import dataclass, field
 import hashlib
@@ -6,7 +6,6 @@ import ipaddress
 import re
 import struct
 
-HEX56_RE = re.compile(rb"^[0-9a-f]{56}$")
 HTTP_RE = re.compile(
     rb"(GET|POST|PUT|DELETE|HEAD|OPTIONS|PATCH|CONNECT|TRACE) [^\r\n]{1,2048} HTTP/1\.[01]\r\n|HTTP/1\.[01] [0-9]{3} "
 )
@@ -70,22 +69,6 @@ TLS_VERSIONS = {
     0x0303: "TLS 1.2",
     0x0304: "TLS 1.3",
 }
-
-ANYTLS_COMMANDS = {
-    0: "cmdWaste",
-    1: "cmdSYN",
-    2: "cmdPSH",
-    3: "cmdFIN",
-    4: "cmdSettings",
-    5: "cmdAlert",
-    6: "cmdUpdatePaddingScheme",
-    7: "cmdSYNACK",
-    8: "cmdHeartRequest",
-    9: "cmdHeartResponse",
-    10: "cmdServerSettings",
-}
-
-ANYTLS_SETTING_KEYS = {"v", "client", "padding-md5", "stop", "0", "1", "2"}
 
 
 @dataclass
@@ -461,185 +444,6 @@ def parse_tls(p):
     return True
 
 
-def parse_trojan(p):
-    """Exact dissector for plaintext/decrypted Trojan protocol request header."""
-    data = p.payload
-    if "tcp" not in p.layers or len(data) < 64:
-        return False
-    if data[56:58] != b"\r\n" or not HEX56_RE.match(data[:56]):
-        return False
-    cmd = data[58]
-    if cmd not in (1, 3):
-        return False
-    atyp = data[59]
-    pos = 60
-    if atyp == 1:
-        if pos + 8 > len(data):
-            return False
-        target_host = str(ipaddress.IPv4Address(data[pos : pos + 4]))
-        pos += 4
-        atyp_name = "IPv4"
-    elif atyp == 3:
-        if pos + 1 > len(data):
-            return False
-        dlen = data[pos]
-        pos += 1
-        if dlen == 0 or pos + dlen + 4 > len(data):
-            return False
-        domain_bytes = data[pos : pos + dlen]
-        if any(b < 33 or b > 126 for b in domain_bytes):
-            return False
-        target_host = domain_bytes.decode("ascii")
-        pos += dlen
-        atyp_name = "Domain"
-    elif atyp == 4:
-        if pos + 20 > len(data):
-            return False
-        target_host = str(ipaddress.IPv6Address(data[pos : pos + 16]))
-        pos += 16
-        atyp_name = "IPv6"
-    else:
-        return False
-    target_port = int.from_bytes(data[pos : pos + 2], "big")
-    if data[pos + 2 : pos + 4] != b"\r\n":
-        return False
-    pos += 4
-    pwd_hash = data[:56].decode("ascii")
-    inner_len = len(data) - pos
-    cmd_name = "CONNECT" if cmd == 1 else "UDP_ASSOCIATE"
-
-    p.layers.update(("trojan", "proxy"))
-    p.protocol = "Trojan"
-    p.details["Trojan"] = {
-        "mode": "明文/解密后协议帧精确匹配",
-        "sha224_prefix": f"{pwd_hash[:8]}...{pwd_hash[-4:]}",
-        "command": cmd_name,
-        "address_type": atyp_name,
-        "target_host": target_host,
-        "target_port": target_port,
-        "inner_payload_bytes": inner_len,
-    }
-    p.info = f"Trojan {cmd_name} → {target_host}:{target_port} (inner={inner_len} B)"
-    return True
-
-
-def _parse_anytls_frames(buf):
-    pos = 0
-    frames = []
-    settings = {}
-    has_signature_frame = False
-    while pos + 7 <= len(buf) and len(frames) < 64:
-        cmd = buf[pos]
-        if cmd not in ANYTLS_COMMANDS:
-            return None
-        sid = int.from_bytes(buf[pos + 1 : pos + 5], "big")
-        flen = int.from_bytes(buf[pos + 5 : pos + 7], "big")
-        pos += 7
-        if pos + flen > len(buf):
-            return None
-        body = buf[pos : pos + flen]
-        pos += flen
-
-        # Structural sanity checks per AnyTLS specification
-        if cmd in (1, 7, 8, 9) and flen != 0:
-            return None
-        if cmd in (0, 4, 6, 10) and sid != 0:
-            return None
-
-        entry = {
-            "cmd": cmd,
-            "cmd_name": ANYTLS_COMMANDS[cmd],
-            "sid": sid,
-            "length": flen,
-        }
-        if cmd in (4, 6, 10) and flen > 0:
-            try:
-                text = body.decode("utf-8")
-            except UnicodeDecodeError:
-                return None
-            parsed_kv = {}
-            for line in text.splitlines():
-                if "=" in line:
-                    k, v = line.split("=", 1)
-                    parsed_kv[k.strip()] = v.strip()
-            if parsed_kv and (set(parsed_kv) & ANYTLS_SETTING_KEYS):
-                has_signature_frame = True
-                settings.update(parsed_kv)
-                entry["fields"] = parsed_kv
-            elif cmd == 4:
-                return None
-        frames.append(entry)
-    if pos != len(buf) or not frames:
-        return None
-    if not has_signature_frame:
-        # Require at least 2 coherent frames with plausible stream IDs & control command
-        if len(frames) < 2:
-            return None
-        cmds = {f["cmd"] for f in frames}
-        if not (cmds & {0, 1, 7, 8, 9}):
-            return None
-        if any(f["sid"] > 1_000_000 for f in frames):
-            return None
-    return frames, settings
-
-
-def parse_anytls(p):
-    """Exact dissector for plaintext/decrypted AnyTLS auth prologue and frame sequence."""
-    data = p.payload
-    if "tcp" not in p.layers or len(data) < 7:
-        return False
-
-    auth_present = False
-    padding_len = 0
-    sha256_prefix = ""
-    result = None
-
-    # Pattern A: 32-byte SHA256(password) + 2-byte padding_len + padding + AnyTLS frames
-    if len(data) >= 41:
-        pad_len = int.from_bytes(data[32:34], "big")
-        offset = 34 + pad_len
-        if pad_len <= 4096 and offset + 7 <= len(data):
-            candidate = _parse_anytls_frames(data[offset:])
-            if candidate is not None:
-                frames, settings = candidate
-                # Require settings or explicit control command after auth prologue
-                if settings or any(f["cmd"] in (1, 4, 6, 10) for f in frames):
-                    auth_present = True
-                    padding_len = pad_len
-                    sha256_prefix = data[:4].hex() + "..." + data[30:32].hex()
-                    result = candidate
-
-    # Pattern B: Standalone AnyTLS control/data frame sequence
-    if result is None:
-        result = _parse_anytls_frames(data)
-
-    if result is None:
-        return False
-
-    frames, settings = result
-    p.layers.update(("anytls", "proxy"))
-    p.protocol = "AnyTLS"
-    detail = {
-        "mode": "明文/解密后协议帧精确匹配",
-        "auth_prologue": auth_present,
-        "frame_count": len(frames),
-        "frames": frames,
-    }
-    if auth_present:
-        detail["sha256_prefix"] = sha256_prefix
-        detail["initial_padding_bytes"] = padding_len
-    if settings:
-        detail["settings"] = settings
-    p.details["AnyTLS"] = detail
-
-    cmds_summary = ", ".join(f"{f['cmd_name']}(sid={f['sid']},len={f['length']})" for f in frames[:3])
-    if len(frames) > 3:
-        cmds_summary += f" +{len(frames) - 3}"
-    prefix = f"Auth(pad={padding_len}B) + " if auth_present else ""
-    p.info = f"AnyTLS {prefix}{cmds_summary}"
-    return True
-
-
 def application(p):
     data = p.payload
     if "tcp" in p.layers and HTTP_RE.match(data):
@@ -707,12 +511,8 @@ def application(p):
         p.info = ("response " if flags & 0x8000 else "query ") + ", ".join(
             q["name"] for q in questions
         )
-    elif parse_tls(p):
-        return
-    elif parse_trojan(p):
-        return
-    elif parse_anytls(p):
-        return
+    else:
+        parse_tls(p)
 
 
 def decode(timestamp, raw, wirelen=None, linktype=1, number=0):

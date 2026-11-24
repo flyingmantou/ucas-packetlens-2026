@@ -16,11 +16,7 @@ from .fixtures import (
     dns,
     demo_frames,
     tls_client_hello,
-    tls_server_hello,
     tls_app_record,
-    trojan_header,
-    anytls_frame,
-    anytls_auth_and_settings,
 )
 
 
@@ -356,7 +352,7 @@ class ProcessTests(unittest.TestCase):
         self.assertIn("不可用", m.status)
 
 
-class AdvancedProtocolAndIntelTests(unittest.TestCase):
+class TlsAndSecurityTests(unittest.TestCase):
     def test_tls_client_hello_sni_alpn_ja3(self):
         p = packet(
             tls_client_hello(sni="github.com", alpn=("h2", "http/1.1")), dport=443
@@ -373,56 +369,25 @@ class AdvancedProtocolAndIntelTests(unittest.TestCase):
         self.assertEqual(p.protocol, "TLS")
         self.assertEqual([r["length"] for r in p.tls_records], [40, 450, 620])
 
-    def test_trojan_deterministic_domain_and_ipv4(self):
-        p = packet(trojan_header(target_host="example.org", target_port=443), dport=443)
-        self.assertEqual(p.protocol, "Trojan")
-        self.assertIn("trojan", p.layers)
-        self.assertEqual(p.details["Trojan"]["target_host"], "example.org")
-        self.assertEqual(p.details["Trojan"]["target_port"], 443)
-
-        p4 = packet(trojan_header(target_host="93.184.216.34", target_port=80), dport=443)
-        self.assertEqual(p4.protocol, "Trojan")
-        self.assertEqual(p4.details["Trojan"]["target_host"], "93.184.216.34")
-
-    def test_trojan_rejects_non_trojan_hex_text(self):
-        p = packet(b"a" * 56 + b"\r\n\x99\x01\x01\x02\x03\x04\x00\x50\r\n", dport=443)
-        self.assertEqual(p.protocol, "TCP")
-
-    def test_anytls_deterministic_auth_and_frames(self):
-        p = packet(anytls_auth_and_settings(pad_len=30), dport=8443)
-        self.assertEqual(p.protocol, "AnyTLS")
-        self.assertIn("anytls", p.layers)
-        self.assertTrue(p.details["AnyTLS"]["auth_prologue"])
-        self.assertEqual(p.details["AnyTLS"]["initial_padding_bytes"], 30)
-        self.assertEqual(p.details["AnyTLS"]["settings"]["v"], "2")
-
-        # Standalone padding scheme update frame
-        scheme = b"stop=8\n0=30-30\n1=100-400\n"
-        p2 = packet(anytls_frame(6, 0, scheme), dport=8443)
-        self.assertEqual(p2.protocol, "AnyTLS")
-        self.assertEqual(p2.details["AnyTLS"]["frames"][0]["cmd_name"], "cmdUpdatePaddingScheme")
-
-    def test_anytls_rejects_random_binary(self):
-        p = packet(b"\x01\x00\x00\x00\x01\x00\x05hello", dport=8443)
-        self.assertEqual(p.protocol, "TCP")
-
-    def test_encrypted_trojan_vs_anytls_vs_normal_https(self):
+    def test_https_through_local_connect(self):
         table = StreamTable()
-        for i, raw in enumerate(demo_frames(), 1):
-            p = decode(1000.0 + i * 0.05, raw, number=i)
+        payloads = [
+            b"CONNECT example.test:443 HTTP/1.1\r\nHost: example.test:443\r\n\r\n",
+            tls_client_hello(sni="example.test", alpn=("h2", "http/1.1")),
+            b"".join(tls_app_record(n) for n in (63, 87, 429, 651, 26, 34)),
+        ]
+        packets = []
+        seq = 1
+        for payload in payloads:
+            p = packet(payload, src="127.0.0.1", dst="127.0.0.1", dport=7897, seq=seq)
             table.add(p)
-        table.finalize_intel()
+            packets.append(p)
+            seq += len(payload)
+        self.assertEqual([p.protocol for p in packets], ["HTTP", "TLS", "TLS"])
+        self.assertEqual(table.streams[0].protocol_label, "TLS 1.3 (example.test)")
+        self.assertEqual(analyze_security(packets, table), [])
 
-        by_sni = {s.tls_sni: s.intel for s in table.streams if s.tls_sni}
-        self.assertEqual(by_sni["www.ucas.ac.cn"]["proxy_family"], "")
-        self.assertEqual(by_sni["edge.trojan-demo.test"]["proxy_family"], "Trojan")
-        self.assertEqual(by_sni["edge.trojan-demo.test"]["detection_mode"], "heuristic")
-        self.assertGreaterEqual(by_sni["edge.trojan-demo.test"]["confidence"], 55)
-        self.assertEqual(by_sni["cdn.anytls-demo.test"]["proxy_family"], "AnyTLS")
-        self.assertEqual(by_sni["cdn.anytls-demo.test"]["detection_mode"], "heuristic")
-        self.assertGreaterEqual(by_sni["cdn.anytls-demo.test"]["confidence"], 55)
-
-    def test_new_display_filters_and_process_summary(self):
+    def test_display_filters_and_process_summary(self):
         table = StreamTable()
         pkts = []
         for i, raw in enumerate(demo_frames(), 1):
@@ -432,14 +397,10 @@ class AdvancedProtocolAndIntelTests(unittest.TestCase):
                 p.process = "curl"
             table.add(p)
             pkts.append(p)
-        table.finalize_intel()
 
         self.assertTrue(any(compile_filter('tls.sni == "www.ucas.ac.cn"')(p) for p in pkts))
-        self.assertTrue(any(compile_filter('tls.sni contains "trojan"')(p) for p in pkts))
+        self.assertTrue(any(compile_filter('tls.sni contains "ucas"')(p) for p in pkts))
         self.assertTrue(any(compile_filter('process == "curl"')(p) for p in pkts))
-        self.assertTrue(any(compile_filter("proxy")(p) for p in pkts))
-        self.assertTrue(any(compile_filter("trojan")(p) for p in pkts))
-        self.assertTrue(any(compile_filter("anytls")(p) for p in pkts))
 
         summary = table.process_summary()
         self.assertTrue(any(g["pid"] == 4242 and g["name"] == "curl" for g in summary))
@@ -475,7 +436,6 @@ class AdvancedProtocolAndIntelTests(unittest.TestCase):
             p = decode(1.0 + i * 0.01, raw, number=i)
             table.add(p)
             pkts.append(p)
-        table.finalize_intel()
         alerts = analyze_security(pkts, table)
         cats = {a["category"] for a in alerts}
         self.assertIn("明文凭据泄露", cats)

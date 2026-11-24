@@ -1,4 +1,3 @@
-import hashlib
 import ipaddress
 import struct
 
@@ -139,47 +138,6 @@ def tls_app_record(length):
     return b"\x17\x03\x03" + struct.pack("!H", length) + (b"\xaa" * length)
 
 
-def trojan_header(
-    password="ucas-trojan-demo",
-    cmd=1,
-    target_host="github.com",
-    target_port=443,
-    inner=b"GET / HTTP/1.1\r\nHost: github.com\r\n\r\n",
-):
-    pwd_hex = hashlib.sha224(password.encode()).hexdigest().encode("ascii")
-    try:
-        ip_obj = ipaddress.ip_address(target_host)
-        if ip_obj.version == 4:
-            addr = b"\x01" + ip_obj.packed
-        else:
-            addr = b"\x04" + ip_obj.packed
-    except ValueError:
-        hb = target_host.encode("ascii")
-        addr = b"\x03" + bytes([len(hb)]) + hb
-    return pwd_hex + b"\r\n" + bytes([cmd]) + addr + struct.pack("!H", target_port) + b"\r\n" + inner
-
-
-def anytls_frame(cmd, sid=0, payload=b""):
-    return struct.pack("!BIH", cmd, sid, len(payload)) + payload
-
-
-def anytls_auth_and_settings(
-    password="ucas-anytls-demo",
-    pad_len=30,
-    client="anytls/0.0.8",
-):
-    auth = hashlib.sha256(password.encode()).digest()
-    padding = b"\x00" * pad_len
-    settings_body = f"v=2\nclient={client}\npadding-md5=7b8c9d0e1f2a3b4c\n".encode("utf-8")
-    return (
-        auth
-        + struct.pack("!H", pad_len)
-        + padding
-        + anytls_frame(4, 0, settings_body)
-        + anytls_frame(1, 1, b"")
-    )
-
-
 def demo_frames():
     request = b"GET /course HTTP/1.1\r\nHost: example.test\r\n\r\n"
     response = b"HTTP/1.1 200 OK\r\nContent-Length: 10\r\n\r\nPacketLens"
@@ -216,7 +174,7 @@ def demo_frames():
         frame(b"abc", sport=54000, seq=10),
         frame(b"xyz", sport=54000, seq=20),
         frame(b"damaged")[:25],
-        # Normal HTTPS TLS 1.3 flow with SNI + ALPN (should NOT trigger proxy alert)
+        # Normal HTTPS TLS 1.3 flow with SNI + ALPN
         frame(
             tls_client_hello(sni="www.ucas.ac.cn", alpn=("h2", "http/1.1")),
             src="10.0.0.1",
@@ -240,117 +198,6 @@ def demo_frames():
             sport=55000,
             dport=443,
             seq=1300,
-        ),
-        # Plaintext Trojan inner frame (deterministic match)
-        frame(
-            trojan_header(target_host="github.com", target_port=443),
-            src="10.0.0.1",
-            dst="10.0.0.9",
-            sport=56000,
-            dport=10443,
-            seq=1,
-        ),
-        # Encrypted Trojan (TLS-in-TLS double handshake without ALPN)
-        frame(
-            tls_client_hello(
-                sni="edge.trojan-demo.test",
-                alpn=(),
-                ciphers=(0x1301, 0x1302, 0x1303, 0xC02F, 0xC030),
-            ),
-            src="10.0.0.1",
-            dst="198.51.100.20",
-            sport=57000,
-            dport=443,
-            seq=100,
-        ),
-        frame(
-            tls_server_hello(),
-            src="198.51.100.20",
-            dst="10.0.0.1",
-            sport=443,
-            dport=57000,
-            seq=500,
-        ),
-        frame(
-            tls_app_record(518),
-            src="10.0.0.1",
-            dst="198.51.100.20",
-            sport=57000,
-            dport=443,
-            seq=400,
-        ),
-        frame(
-            tls_app_record(1420) + tls_app_record(1460),
-            src="198.51.100.20",
-            dst="10.0.0.1",
-            sport=443,
-            dport=57000,
-            seq=700,
-        ),
-        frame(
-            tls_app_record(96),
-            src="10.0.0.1",
-            dst="198.51.100.20",
-            sport=57000,
-            dport=443,
-            seq=930,
-        ),
-        # Plaintext AnyTLS auth prologue + cmdSettings + cmdSYN (deterministic match)
-        frame(
-            anytls_auth_and_settings(),
-            src="10.0.0.1",
-            dst="10.0.0.10",
-            sport=58000,
-            dport=8443,
-            seq=1,
-        ),
-        # Encrypted AnyTLS (early multi-record padding scheme + heartbeat)
-        frame(
-            tls_client_hello(
-                sni="cdn.anytls-demo.test",
-                alpn=(),
-                ciphers=(0x1301, 0x1302, 0x1303, 0xC02F, 0xC030),
-            ),
-            src="10.0.0.1",
-            dst="203.0.113.50",
-            sport=59000,
-            dport=8443,
-            seq=100,
-        ),
-        frame(
-            tls_server_hello(),
-            src="203.0.113.50",
-            dst="10.0.0.1",
-            sport=8443,
-            dport=59000,
-            seq=500,
-        ),
-        frame(
-            tls_app_record(48)
-            + tls_app_record(440)
-            + tls_app_record(620)
-            + tls_app_record(780),
-            src="10.0.0.1",
-            dst="203.0.113.50",
-            sport=59000,
-            dport=8443,
-            seq=400,
-        ),
-        frame(
-            tls_app_record(24),
-            src="203.0.113.50",
-            dst="10.0.0.1",
-            sport=8443,
-            dport=59000,
-            seq=700,
-        ),
-        frame(
-            tls_app_record(24),
-            src="10.0.0.1",
-            dst="203.0.113.50",
-            sport=59000,
-            dport=8443,
-            seq=2320,
         ),
     ]
     return frames

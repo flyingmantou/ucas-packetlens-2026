@@ -5,7 +5,7 @@ import re
 
 TOKEN = re.compile(r'\s*(>=|<=|==|!=|>|<|\(|\)|"[^"\r\n]*"|[^\s()=!<>]+)')
 PROTOCOLS = set(
-    "ethernet arp ip ipv4 ipv6 tcp udp icmp icmpv6 http dns tls trojan anytls proxy suspect_trojan suspect_anytls".split()
+    "ethernet arp ip ipv4 ipv6 tcp udp icmp icmpv6 http dns tls".split()
 )
 NUMERIC_FIELDS = set("tcp.port udp.port port len stream pid".split())
 IP_FIELDS = set("ip.addr ip.src ip.dst".split())

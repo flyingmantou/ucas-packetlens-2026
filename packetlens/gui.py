@@ -106,11 +106,6 @@ class App:
             label="快捷过滤：TLS / HTTPS",
             command=lambda: self.preset("tls"),
         )
-        actions.add_command(
-            label="快捷过滤：Trojan / AnyTLS 代理流",
-            command=lambda: self.preset("proxy"),
-            accelerator=_accel("Shift+P"),
-        )
         actions.add_command(label="显示全部", command=lambda: self.preset(""))
         menu.add_cascade(label="分析", menu=actions)
         self.root.config(menu=menu)
@@ -126,7 +121,7 @@ class App:
         )
         ttk.Label(
             header,
-            text="  实时捕获  /  协议分层  /  TLS SNI & JA3  /  Trojan & AnyTLS 识别  /  进程与流时序追踪",
+            text="  实时捕获  /  协议分层  /  TLS SNI & JA3  /  进程与流时序追踪",
             foreground="#52606d",
             font=_ui_font(10),
         ).pack(side="left", pady=(8, 0))
@@ -174,7 +169,7 @@ class App:
         )
         ttk.Label(
             outer,
-            text='例：http  |  tls.sni contains "ucas"  |  proxy  |  trojan or anytls  |  tcp and (port == 8080 or port == 443)  |  contains "GET"',
+            text='例：http  |  tls.sni contains "ucas"  |  tcp and (port == 8080 or port == 443)  |  contains "GET"',
             foreground="#596575",
             font=_ui_font(9),
         ).pack(anchor="w", pady=(3, 4))
@@ -241,7 +236,6 @@ class App:
         self.tree.tag_configure("http", background="#e8f7ec")
         self.tree.tag_configure("dns", background="#e8f3fc")
         self.tree.tag_configure("tls", background="#f2ecfa")
-        self.tree.tag_configure("proxy", background="#fff2d6")
         self.tree.tag_configure("icmp", background="#fef4e8")
         self.tree.tag_configure("arp", background="#e8f8f7")
         self.tree.tag_configure("warn", background="#fdeaea")
@@ -351,7 +345,7 @@ class App:
             "duration",
             "process",
             "sni",
-            "intel",
+            "protocol",
         )
         self.stream_tree = ttk.Treeview(
             stream_box, columns=scols, show="headings", height=10
@@ -367,15 +361,14 @@ class App:
                 "持续时间",
                 "进程",
                 "TLS SNI",
-                "协议 / 代理识别",
+                "协议",
             ),
             (52, 165, 165, 65, 80, 88, 120, 150, 195),
         ):
             self.stream_tree.heading(c, text=t)
             self.stream_tree.column(
-                c, width=w, stretch=c in ("client", "server", "sni", "intel")
+                c, width=w, stretch=c in ("client", "server", "sni", "protocol")
             )
-        self.stream_tree.tag_configure("proxy", background="#fff2d6")
         ss = ttk.Scrollbar(
             stream_box, orient="vertical", command=self.stream_tree.yview
         )
@@ -421,7 +414,7 @@ class App:
 
     def _build_security_tab(self):
         tab = ttk.Frame(self.notebook)
-        self.notebook.add(tab, text="协议识别与安全告警")
+        self.notebook.add(tab, text="安全告警")
         split = ttk.Panedwindow(tab, orient="vertical")
         split.pack(fill="both", expand=True, padx=6, pady=6)
 
@@ -430,12 +423,9 @@ class App:
         bar.pack(fill="x", pady=(0, 4))
         ttk.Label(
             bar,
-            text="自动检测 Trojan / AnyTLS（明文帧确认 + 加密流特征启发式）及常见安全风险（双击可跳转定位）",
+            text="明文凭据、端口扫描、ARP 地址冲突与 TCP 重叠冲突（双击告警可定位）",
             foreground="#465868",
         ).pack(side="left")
-        ttk.Button(
-            bar, text="仅过滤代理流", command=lambda: self._jump_filter("proxy")
-        ).pack(side="right")
 
         acols = ("severity", "category", "title", "target")
         self.alert_tree = ttk.Treeview(top, columns=acols, show="headings", height=11)
@@ -468,7 +458,6 @@ class App:
             self.root.bind(f"<{mod}-d>", lambda e: self.sample())
             self.root.bind(f"<{mod}-t>", lambda e: self.follow())
             self.root.bind(f"<{mod}-Shift-F>", lambda e: self.preset("http"))
-            self.root.bind(f"<{mod}-Shift-P>", lambda e: self.preset("proxy"))
             self.root.bind(
                 f"<{mod}-l>",
                 lambda e: self.load(
@@ -557,8 +546,6 @@ class App:
     def _row_tag(self, p):
         if p.warning or ("tcp" in p.layers and (p.flags & 0x04)):
             return ("warn",)
-        if "proxy" in p.layers or p.protocol in ("Trojan", "AnyTLS"):
-            return ("proxy",)
         proto = p.protocol.lower()
         if proto in ("http", "dns", "tls", "icmp", "icmpv6", "arp"):
             return ("icmp" if proto == "icmpv6" else proto,)
@@ -589,22 +576,13 @@ class App:
         )
         self.shown += 1
 
-    def _refresh_row_tags(self):
-        for iid in self.tree.get_children():
-            idx = int(iid) - 1
-            if 0 <= idx < len(self.packets):
-                self.tree.item(iid, tags=self._row_tag(self.packets[idx]))
-
     def update_summary(self):
-        self.streams.finalize_intel()
-        self._refresh_row_tags()
         self.alerts = analyze_security(self.packets, self.streams)
 
         counts = Counter(p.protocol for p in self.packets)
-        proxy_cnt = sum(1 for s in self.streams.streams if s.intel["proxy_family"])
         self.summary.set(
             f"已捕获 / 导入 {len(self.packets)} 包   显示 {self.shown} 包   TCP 流 {len(self.streams.streams)}   "
-            f"代理识别 {proxy_cnt}   安全告警 {len(self.alerts)}   原始数据 {self.bytes:,} B   |  "
+            f"安全告警 {len(self.alerts)}   原始数据 {self.bytes:,} B   |  "
             + "  ".join(f"{k} {v}" for k, v in counts.most_common(8))
         )
         self._update_process_and_streams_views()
@@ -632,7 +610,7 @@ class App:
         self._populate_stream_table()
 
         choices = [
-            f"流 #{s.id} | {s.client_endpoint[0]}:{s.client_endpoint[1]} ↔ {s.server_endpoint[0]}:{s.server_endpoint[1]} ({s.intel['protocol_label']})"
+            f"流 #{s.id} | {s.client_endpoint[0]}:{s.client_endpoint[1]} ↔ {s.server_endpoint[0]}:{s.server_endpoint[1]} ({s.protocol_label})"
             for s in self.streams.streams
             if s.client_endpoint and s.server_endpoint
         ]
@@ -663,12 +641,10 @@ class App:
                 if s.server_endpoint
                 else "—"
             )
-            tags = ("proxy",) if s.intel["proxy_family"] else ()
             self.stream_tree.insert(
                 "",
                 "end",
                 iid=str(s.id),
-                tags=tags,
                 values=(
                     s.id,
                     ce,
@@ -678,7 +654,7 @@ class App:
                     f"{s.last - s.first:.4f}s",
                     s.process_label(),
                     s.tls_sni or "—",
-                    s.intel["protocol_label"],
+                    s.protocol_label,
                 ),
             )
 
@@ -698,7 +674,7 @@ class App:
                 values=(a["severity"], a["category"], a["title"], target),
             )
         if not self.alerts:
-            self.settext(self.alert_detail, "当前会话未检测到代理隧道特征或安全异常告警。")
+            self.settext(self.alert_detail, "当前会话暂无安全告警。")
 
     def _draw_sequence(self):
         c = self.seq_canvas
@@ -732,7 +708,7 @@ class App:
         c.create_text(
             w // 2,
             18,
-            text=f"TCP 流 #{s.id} 时序图 · {s.intel['protocol_label']} · 进程：{s.process_label()}",
+            text=f"TCP 流 #{s.id} 时序图 · {s.protocol_label} · 进程：{s.process_label()}",
             font=_ui_font(11, "bold"),
             fill="#16334a",
         )
@@ -756,9 +732,7 @@ class App:
             is_c2s = ev["dir"] == 0
             x1, x2 = (left_x, right_x) if is_c2s else (right_x, left_x)
             color = "#1f6f9f" if is_c2s else "#2d7d46"
-            if ev["protocol"] in ("Trojan", "AnyTLS"):
-                color = "#b85d00"
-            elif "RST" in ev["flags"]:
+            if "RST" in ev["flags"]:
                 color = "#c0392b"
             elif ev["protocol"] == "TLS":
                 color = "#6b46c1" if is_c2s else "#4c51bf"
@@ -798,8 +772,6 @@ class App:
         palette = {
             "HTTP": "#2e8b57",
             "TLS": "#6b46c1",
-            "Trojan": "#d97706",
-            "AnyTLS": "#b45309",
             "DNS": "#2563eb",
             "TCP": "#3b82f6",
             "UDP": "#0ea5e9",
@@ -1011,7 +983,6 @@ class App:
         except ValueError as e:
             messagebox.showerror("过滤表达式无效", str(e))
             return
-        self.streams.finalize_intel()
         self.fn = fn
         self.tree.delete(*self.tree.get_children())
         self.shown = 0
@@ -1091,41 +1062,6 @@ class App:
             )
             self._insert_tree_nodes(node, layer_val)
 
-        if p.stream >= 0 and p.stream < len(self.streams.streams):
-            s = self.streams.streams[p.stream]
-            info = s.intel
-            intel_node = self.detail_tree.insert(
-                "",
-                "end",
-                text="流智能分析 (NPA / 代理识别)",
-                values=(info["protocol_label"],),
-                open=bool(info["proxy_family"]),
-            )
-            self.detail_tree.insert(intel_node, "end", text="流号", values=(str(s.id),))
-            self.detail_tree.insert(
-                intel_node,
-                "end",
-                text="识别模式",
-                values=(info["detection_mode"],),
-            )
-            self.detail_tree.insert(
-                intel_node,
-                "end",
-                text="置信度",
-                values=(f"{info['confidence']}% ({info['confidence_level']})",),
-            )
-            for idx, r in enumerate(info["reasons"]):
-                self.detail_tree.insert(
-                    intel_node, "end", text=f"依据 {idx + 1}", values=(r,)
-                )
-            if info["record_sequence"]:
-                self.detail_tree.insert(
-                    intel_node,
-                    "end",
-                    text="TLS 密文长度序列",
-                    values=(" → ".join(info["record_sequence"]),),
-                )
-
         self.settext(
             self.hex,
             "\n".join(
@@ -1139,7 +1075,7 @@ class App:
         if stream_id < 0 or stream_id >= len(self.streams.streams):
             return
         win = tk.Toplevel(self.root)
-        win.title(f"TCP 流 {stream_id} · 双向重组与协议智能分析")
+        win.title(f"TCP 流 {stream_id} · 双向重组与协议详情")
         win.geometry("920x620")
         text = tk.Text(win, font=_mono_font(11), wrap="word")
         text.pack(fill="both", expand=True, padx=12, pady=12)

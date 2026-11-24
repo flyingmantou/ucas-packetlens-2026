@@ -54,8 +54,14 @@ test_reconstructed_http (tests.test_core.StreamTests.test_reconstructed_http) ..
 test_reorder (tests.test_core.StreamTests.test_reorder) ... ok
 test_stream_bound (tests.test_core.StreamTests.test_stream_bound) ... ok
 test_wrap (tests.test_core.StreamTests.test_wrap) ... ok
+test_display_filters_and_process_summary (tests.test_core.TlsAndSecurityTests.test_display_filters_and_process_summary) ... ok
+test_https_through_local_connect (tests.test_core.TlsAndSecurityTests.test_https_through_local_connect) ... ok
+test_macos_timeval_abi (tests.test_core.TlsAndSecurityTests.test_macos_timeval_abi) ... ok
+test_security_alerts (tests.test_core.TlsAndSecurityTests.test_security_alerts) ... ok
+test_tls_client_hello_sni_alpn_ja3 (tests.test_core.TlsAndSecurityTests.test_tls_client_hello_sni_alpn_ja3) ... ok
+test_tls_multi_record_parsing (tests.test_core.TlsAndSecurityTests.test_tls_multi_record_parsing) ... ok
 
 ----------------------------------------------------------------------
-Ran 56 tests in 0.055s
+Ran 62 tests in 0.077s
 
 OK
